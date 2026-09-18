@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d14">
+<title>MedHelp – Erste-Hilfe-Assistent</title>
+<style>
+:root{--bg:#090d14;--panel:#111824;--panel2:#182131;--text:#f4f7fb;--muted:#9eabbc;--accent:#ff3b30;--ok:#27d17f;--warn:#ffb020;--line:#263244}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172234 0,#090d14 48%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;border:0;cursor:pointer}.app{max-width:720px;margin:auto;padding:16px 14px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.brand{font-weight:900;font-size:22px}.sub{color:var(--muted);font-size:12px}.badge{background:#202b3b;border:1px solid var(--line);padding:7px 9px;border-radius:999px;font-size:11px;color:#cbd5e1}
+.card{background:rgba(17,24,36,.94);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 12px 35px #0005;margin-bottom:14px}
+h1{font-size:30px;line-height:1.05;margin:4px 0 8px}.lead{color:#c7d0dc;line-height:1.5;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{min-height:92px;text-align:left;background:var(--panel2);border:1px solid #2b394d;border-radius:17px;padding:14px;transition:.15s}.tile:active{transform:scale(.98)}.ico{font-size:26px;display:block;margin-bottom:7px}.tile b{font-size:14px}.tile small{display:block;color:var(--muted);margin-top:3px}
+.danger{background:linear-gradient(135deg,#a91f1b,#ff3b30);border:0}.danger small{color:#ffe0de}
+.primary{width:100%;padding:15px;border-radius:15px;background:#e9eef5;color:#09101a;font-weight:850}.secondary{width:100%;padding:13px;border-radius:15px;background:#202c3d;margin-top:9px}.back{background:none;color:#b7c3d2;padding:5px 0;margin-bottom:10px}
+.stepno{color:#ff6b63;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.08em}.step h2{font-size:25px;margin:6px 0 10px}.instruction{font-size:18px;line-height:1.5}.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.choice button{padding:17px;border-radius:15px;background:#243247;font-weight:850}.choice .yes{background:#175d43}.choice .no{background:#7d211d}
+.progress{height:6px;background:#202b39;border-radius:99px;overflow:hidden;margin:10px 0 16px}.progress>div{height:100%;background:#ff3b30;width:0}
+.pulse{width:190px;height:190px;border-radius:50%;margin:20px auto;background:#27191a;border:8px solid #ff3b30;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:950;font-size:24px;box-shadow:0 0 0 0 #ff3b3040;animation:pulse 1s infinite}.pulse.active{animation:pulseFast .55s infinite}
+@keyframes pulse{50%{transform:scale(1.035);box-shadow:0 0 0 18px #ff3b3000}}@keyframes pulseFast{50%{transform:scale(.94);background:#ff3b30;color:white}}
+.timer{text-align:center;font-size:42px;font-variant-numeric:tabular-nums;font-weight:900}.row{display:flex;gap:9px}.row>*{flex:1}
+.notice{border-left:4px solid var(--warn);padding:12px 13px;background:#211d12;border-radius:10px;color:#eadfca;line-height:1.45;font-size:13px}.safe{border-left-color:var(--ok);background:#102219}
+.footer{color:#7f8b9b;font-size:11px;line-height:1.45;text-align:center;margin-top:16px}.triage-question{font-size:22px;font-weight:850;line-height:1.25}.triage-answer{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.triage-answer button{padding:17px;border-radius:15px;background:#243247;font-weight:850}.triage-answer .urgent{background:#7d211d}.route{border:1px solid var(--line);border-radius:16px;padding:14px;background:#162131;margin-top:12px}.route strong{display:block;margin-bottom:5px}.emergency{position:fixed;top:10px;right:10px;z-index:1000;background:#d71910;color:white;border:2px solid #ff8a84;border-radius:999px;padding:10px 13px;font-weight:950;font-size:12px;box-shadow:0 6px 20px #0008;animation:emergencyBlink 1.15s infinite}.emergency:active{transform:scale(.96)}@keyframes emergencyBlink{0%,100%{box-shadow:0 6px 20px #0008,0 0 0 0 #ff3b3055}50%{box-shadow:0 6px 20px #0008,0 0 0 8px #ff3b3000}}.modal{position:fixed;inset:0;background:#000b;z-index:2000;display:flex;align-items:center;justify-content:center;padding:18px}.modalbox{width:min(520px,100%);background:#111824;border:2px solid #ff3b30;border-radius:24px;padding:22px;box-shadow:0 20px 60px #000}.modalbox h2{margin:0 0 8px}.modalbox p{color:#c7d0dc;line-height:1.5}.callbtn{width:100%;padding:16px;border-radius:15px;background:#ff3b30;color:white;font-weight:950}.cancelbtn{width:100%;padding:13px;border-radius:15px;background:#253247;margin-top:9px}.hidden{display:none!important}
+@media(max-width:390px){.grid{grid-template-columns:1fr}.app{padding:12px}.card{padding:15px}.pulse{width:165px;height:165px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <button class="emergency" onclick="openEmergency()">🚨 112 NOTRUF</button>
+  <div class="top">
+    <div><div class="brand">MedHelp</div><div class="sub">Erste-Hilfe-Assistent · Öffentliche Version</div></div>
+    <div class="badge">LIVE</div>
+  </div>
+
+
+  <section class="card" id="smartTriageCard">
+    <h1 style="font-size:24px">🧭 Schnelleinschätzung</h1>
+    <p class="lead">Die App fragt dich gezielt nach Warnzeichen und führt dich anschließend in den passenden Erste-Hilfe-Ablauf.</p>
+    <button class="primary" onclick="startTriage()">Schnelleinschätzung starten</button>
+  </section>
+
+  <main id="home">
+    <section class="card">
+      <h1>Was ist passiert?</h1>
+      <p class="lead">Wähle die Situation. Die App führt dich anschließend Schritt für Schritt durch den Ablauf.</p>
+      <div class="grid">
+        <button class="tile danger" onclick="start('cpr')"><span class="ico">🫀</span><b>Bewusstlos</b><small>Reanimation / Atmung</small></button>
+        <button class="tile" onclick="start('bleeding')"><span class="ico">🩸</span><b>Starke Blutung</b><small>Blutung kontrollieren</small></button>
+        <button class="tile" onclick="start('choking')"><span class="ico">😮</span><b>Verschlucken</b><small>Atemwegsblockade</small></button>
+        <button class="tile" onclick="start('burn')"><span class="ico">🔥</span><b>Verbrennung</b><small>Erste Maßnahmen</small></button>
+        <button class="tile" onclick="start('seizure')"><span class="ico">🧠</span><b>Krampfanfall</b><small>Sichern & beobachten</small></button>
+        <button class="tile" onclick="start('allergy')"><span class="ico">🐝</span><b>Allergische Reaktion</b><small>Warnzeichen erkennen</small></button>
+        <button class="tile" onclick="start('breath')"><span class="ico">🫁</span><b>Atemnot</b><small>Situation einschätzen</small></button>
+        <button class="tile" onclick="start('chest')"><span class="ico">❤️</span><b>Brustschmerzen</b><small>Warnzeichen</small></button>
+        <button class="tile" onclick="start('fall')"><span class="ico">🤕</span><b>Sturz / Verletzung</b><small>Erstcheck</small></button>
+        <button class="tile" onclick="start('electric')"><span class="ico">⚡</span><b>Stromunfall</b><small>Eigenschutz zuerst</small></button>
+        <button class="tile" onclick="start('poison')"><span class="ico">☠️</span><b>Vergiftung</b><small>Nichts auf eigene Faust</small></button>
+        <button class="tile" onclick="start('heat')"><span class="ico">🌡️</span><b>Hitze / Unterkühlung</b><small>Temperaturproblem</small></button>
+        <button class="tile" onclick="start('drowning')"><span class="ico">🌊</span><b>Ertrinkungsunfall</b><small>Wasserunfall</small></button>
+        <button class="tile" onclick="start('stroke')"><span class="ico">🧠</span><b>Schlaganfall</b><small>FAST erkennen</small></button>
+        <button class="tile" onclick="start('hypoglycemia')"><span class="ico">🍬</span><b>Unterzuckerung</b><small>Bewusstsein prüfen</small></button>
+        <button class="tile" onclick="start('asthma')"><span class="ico">🌬️</span><b>Asthma</b><small>Atemnot</small></button>
+        <button class="tile" onclick="start('eyechemical')"><span class="ico">👁️</span><b>Chemikalie im Auge</b><small>Sofort spülen</small></button>
+        <button class="tile" onclick="start('amputation')"><span class="ico">🩹</span><b>Amputationsverletzung</b><small>Blutung & Versorgung</small></button>
+        <button class="tile" onclick="start('concussion')"><span class="ico">🪖</span><b>Kopfverletzung</b><small>Warnzeichen</small></button>
+        <button class="tile" onclick="start('shock')"><span class="ico">⚠️</span><b>Schockzeichen</b><small>Kreislaufproblem</small></button>
+      </div>
+    </section>
+
+    <section class="card">
+      <b>⏱️ Automatischer Ablauf</b>
+      <p class="sub" style="margin:7px 0 12px">Normale Anleitungsschritte wechseln nach 12 Sekunden automatisch. Fragen mit mehreren Antwortmöglichkeiten warten bewusst auf deine Auswahl.</p>
+      <button class="secondary" onclick="autoEnabled=!autoEnabled; this.textContent=autoEnabled?'⏱️ Automatik: AN':'⏸️ Automatik: AUS'">⏱️ Automatik: AN</button>
+    </section>
+
+    <section class="card">
+      <b>🔊 Sprachausgabe testen</b>
+      <p class="sub" style="margin:7px 0 12px">Die App nutzt die deutsche Sprachsynthese deines Geräts. Es wird kein externer KI-Dienst benötigt.</p>
+      <button class="secondary" onclick="speak('Dies ist ein Test der deutschen Sprachausgabe. Wenn du mich klar verstehst, funktioniert die Sprachfunktion.')">▶ Stimme testen</button>
+    </section>
+
+
+    <section class="card">
+      <b>📚 Fachliche Grundlage</b>
+      <p class="sub" style="margin:7px 0 10px">Die Notfallstruktur orientiert sich an den European Resuscitation Council Guidelines 2025, insbesondere Basic Life Support und First Aid. Vor einer realen öffentlichen Nutzung sollten Inhalte, Formulierungen und lokale Anforderungen fachlich geprüft und versioniert werden.</p>
+      <div class="sub">Version 1.0 · Inhaltsstand: 2026</div>
+    </section>
+    <section class="card">
+      <div class="notice safe"><b>Wichtig:</b> Diese App ist ein Erste-Hilfe-Navigationsassistent und ersetzt keine Ausbildung, Diagnose oder professionelle medizinische Behandlung. Bei einem echten Notfall: Rettungsdienst über 112 alarmieren und den Anweisungen der Leitstelle folgen.</div>
+    </section>
+  </main>
+
+  <main id="flow" class="hidden"></main>
+  <div id="emergencyModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="emergencyTitle">
+    <div class="modalbox">
+      <h2 id="emergencyTitle">🚨 Notruf 112</h2>
+      <p><b>Nur bei einem echten Notfall.</b> Der nächste Schritt öffnet den Telefon-Dialer deines Smartphones für <b>112</b>.</p>
+      <p style="font-size:13px;color:#9eabbc">In Deutschland ist 112 der kostenlose Notruf für Rettungsdienst und Feuerwehr.</p>
+      <button class="callbtn" onclick="call112()">📞 112 ANRUF STARTEN</button>
+      <button class="cancelbtn" onclick="closeEmergency()">Abbrechen</button>
+    </div>
+  </div>
+
+  <section class="card" id="toolsCard">
+    <h2 style="margin:4px 0 8px">🧰 Notfall-Werkzeuge</h2>
+    <div class="grid">
+      <button class="tile" onclick="openTool('location')"><span class="ico">📍</span><b>Standort</b><small>Für eine Übergabe anzeigen</small></button>
+      <button class="tile" onclick="openTool('log')"><span class="ico">📝</span><b>Einsatzprotokoll</b><small>Ereignisse und Zeiten</small></button>
+      <button class="tile" onclick="openTool('handover')"><span class="ico">🏥</span><b>Übergabe</b><small>Kurzbericht erstellen</small></button>
+      <button class="tile" onclick="openTool('equipment')"><span class="ico">🧰</span><b>Ausrüstung</b><small>Was ist vorhanden?</small></button>
+      <button class="tile" onclick="openTool('learn')"><span class="ico">📚</span><b>Lernmodus</b><small>Erklären & üben</small></button>
+    </div>
+  </section>
+
+    <section class="card">
+      <b>📱 Installierbar</b>
+      <p class="sub" style="margin:7px 0 10px">Die Oberfläche ist für Smartphones ausgelegt. Für eine echte PWA-Veröffentlichung werden zusätzlich Manifest, Service Worker, HTTPS und App-Icons benötigt.</p>
+    </section>
+  <div class="footer">MedHelp ist keine medizinische Diagnose- oder Behandlungssoftware. Inhalte müssen vor einem realen Einsatz fachlich geprüft und regelmäßig aktualisiert werden.</div>
+</div>
+
+<script>
+const data={
+ cpr:[
+  ['1','Sicherheit prüfen','Ist der Ort sicher für dich, die betroffene Person und andere Helfende?','safety'],
+  ['2','Person ansprechen','Sprich die Person laut an und berühre sie vorsichtig an den Schultern. Reagiert sie?','response'],
+  ['3','Hilfe rufen','Wenn keine Reaktion: rufe laut nach Hilfe und bitte eine konkrete Person, den Notruf zu veranlassen und nach einem AED zu suchen.','generic'],
+  ['4','Atemweg öffnen','Öffne vorsichtig den Atemweg, damit du die Atmung beurteilen kannst.','generic'],
+  ['5','Atmung beurteilen','Prüfe, ob die Person normal atmet. Unsichere, unregelmäßige Schnappatmung gilt nicht als normale Atmung.','breathing'],
+  ['6','Notfallhilfe aktivieren','Im echten Notfall jetzt 112 alarmieren, Lautsprecher einschalten und den Anweisungen der Leitstelle folgen. Diese App löst den Anruf nicht automatisch aus; nutze dafür den 112-Notruf-Button.','generic'],
+  ['7','Position vorbereiten','Beginne die Herzdruckmassage möglichst auf einer geeigneten, festen Unterlage. Eine Person auf einem Bett soll dafür nicht unnötig auf den Boden bewegt werden.','generic'],
+  ['8','Handposition finden','Setze den Handballen einer Hand auf die untere Hälfte des Brustbeins, ungefähr in die Mitte des Brustkorbs.','generic'],
+  ['9','Zweite Hand auflegen','Setze den Handballen der zweiten Hand auf die erste und verschränke die Finger, sodass kein Druck auf den Rippen liegt.','generic'],
+  ['10','Körperposition','Halte die Arme möglichst gerade und positioniere deine Schultern senkrecht über dem Brustkorb.','generic'],
+  ['11','Kompressionen starten','Drücke den Brustkorb kräftig und schnell. Ziel sind 100 bis 120 Kompressionen pro Minute.','compressions'],
+  ['12','Kompressionstiefe','Bei Erwachsenen auf etwa 5 bis 6 cm komprimieren. Nach jeder Kompression den Brustkorb vollständig zurückfedern lassen und nicht auf ihm lehnen.','compressions'],
+  ['13','Unterbrechungen minimieren','Unterbrich die Herzdruckmassage so wenig wie möglich. Wenn du nicht beatmen kannst oder nicht darin geschult bist, führe kontinuierliche Brustkompressionen durch.','compressions'],
+  ['14','AED organisieren','Sobald ein AED verfügbar ist, schalte ihn ein und folge seinen Sprach- und Bildanweisungen.','aed'],
+  ['15','Brust freimachen','Mach den Brustkorb entsprechend den AED-Anweisungen frei. Die Elektroden werden auf die nackte Haut geklebt.','aed'],
+  ['16','Elektroden anbringen','Bringe die AED-Elektroden genau entsprechend der Abbildung auf den Pads bzw. am Gerät an.','aed'],
+  ['17','Analyse beachten','Wenn der AED den Herzrhythmus analysiert: Niemand berührt die Person. Warte auf die Ansage des Geräts.','aed'],
+  ['18','Schock sicher durchführen','Wenn ein Schock empfohlen wird, stelle sicher, dass niemand die Person berührt, und folge exakt der Ansage des AED.','aed'],
+  ['19','CPR fortsetzen','Nach der AED-Ansage sofort wieder mit der Reanimation beginnen und den Anweisungen des AED folgen.','compressions'],
+  ['20','Bis Hilfe übernimmt','Setze die Maßnahmen fort, bis professionelle Helfer übernehmen, die Person eindeutig Lebenszeichen zeigt oder du körperlich nicht mehr kannst.','generic']
+ ],
+ bleeding:[
+  ['1','Eigenschutz','Achte auf Verkehr, Glas, Strom, Gewalt oder andere Gefahren, bevor du hilfst.','generic'],
+  ['2','Blutung erkennen','Prüfe, wo die starke Blutung sitzt, ohne dich unnötig selbst mit Blut zu gefährden.','generic'],
+  ['3','Sofort Druck ausüben','Übe mit einer geeigneten Kompresse oder einem sauberen Tuch kräftigen direkten Druck auf die Wunde aus.','generic'],
+  ['4','Hilfe organisieren','Bei lebensbedrohlicher Blutung im echten Notfall 112 alarmieren lassen.','generic'],
+  ['5','Druck halten','Lass den Druck nicht unnötig nach, um die Wunde immer wieder anzusehen.','generic'],
+  ['6','Verband verstärken','Wenn Blut durch das Material dringt, weiteres Material darüberlegen und weiter Druck ausüben, statt den ersten Verband abzunehmen.','generic'],
+  ['7','Person beobachten','Bewusstsein und Atmung beobachten, die Person nicht allein lassen und Veränderungen an die Rettungskräfte weitergeben.','generic'],
+  ['8','Übergabe','Bis professionelle Hilfe übernimmt, die Blutung kontrollieren und den Anweisungen der Leitstelle folgen.','generic']
+ ],
+ choking:[
+  ['1','Situation erkennen','Frage: Kann die Person sprechen, atmen oder kräftig husten?','chokeChoice'],
+  ['2','Kräftiger Husten möglich','Wenn die Person wirksam husten kann, zum Husten ermutigen und aufmerksam beobachten.','generic'],
+  ['3','Verschlechterung beachten','Wird der Husten unwirksam oder kann die Person nicht mehr sprechen oder atmen, muss die Situation als schwere Atemwegsblockade behandelt werden.','generic'],
+  ['4','Hilfe organisieren','Im echten Notfall sofort 112 alarmieren bzw. alarmieren lassen.','generic'],
+  ['5','Weitere Maßnahmen','Bei schwerer Atemwegsblockade den Anweisungen der Leitstelle folgen und die empfohlenen Erste-Hilfe-Maßnahmen durchführen.','generic'],
+  ['6','Bewusstlosigkeit','Wenn die Person bewusstlos wird, den Notfallablauf für Bewusstlosigkeit starten und den Anweisungen der Leitstelle folgen.','generic'],
+  ['7','Nachkontrolle','Auch nach gelöster Blockade bei anhaltenden Beschwerden medizinische Abklärung veranlassen.','generic']
+ ],
+ burn:[
+  ['1','Gefahr beenden','Bringe die Person sicher von der Hitze- oder Verbrennungsquelle weg. Eigenschutz beachten.','generic'],
+  ['2','Ursache beachten','Bei chemischen oder elektrischen Verletzungen gelten besondere Maßnahmen; nicht einfach wie eine gewöhnliche thermische Verbrennung behandeln.','generic'],
+  ['3','Kühlen','Eine geeignete thermische Verbrennung mit kühlem Leitungswasser kühlen. Kein Eis und keine Hausmittel direkt auf die Haut.','generic'],
+  ['4','Schmuck entfernen','Wenn es ohne zusätzliche Verletzung möglich ist, Schmuck oder enge Gegenstände in der Nähe der Verbrennung frühzeitig entfernen, bevor eine stärkere Schwellung entsteht.','generic'],
+  ['5','Nicht festgeklebtes Material','Kleidung, die nicht an der Haut festklebt, vorsichtig entfernen; festgeklebtes Material nicht abreißen.','generic'],
+  ['6','Ausmaß prüfen','Achte auf Größe, Tiefe und betroffene Körperregion. Große, tiefe oder kritische Verbrennungen brauchen professionelle Beurteilung.','generic'],
+  ['7','Besondere Lokalisation','Verbrennungen an Gesicht/Atemwegen, Händen, Genitalbereich oder großen Gelenkregionen besonders ernst nehmen.','generic'],
+  ['8','Hilfe','Bei schweren Verbrennungen, Rauchinhalation, chemischen oder elektrischen Verletzungen professionelle Hilfe veranlassen.','generic']
+ ],
+ seizure:[
+  ['1','Gefahren entfernen','Entferne gefährliche Gegenstände aus der Umgebung, ohne die Person unnötig zu bewegen.','generic'],
+  ['2','Nicht festhalten','Halte die Person während des Krampfanfalls nicht gewaltsam fest.','generic'],
+  ['3','Nichts in den Mund','Stecke keine Gegenstände, Finger oder Nahrung in den Mund.','generic'],
+  ['4','Zeit messen','Merke dir, wann der Anfall beginnt und wie lange er dauert.','generic'],
+  ['5','Kopf schützen','Wenn möglich, den Kopf vor harten Gegenständen schützen, ohne den Anfall zu blockieren.','generic'],
+  ['6','Nach dem Anfall','Wenn die Krampfbewegungen aufgehört haben, Bewusstsein und Atmung prüfen.','generic'],
+  ['7','Erholung','Bei normaler Atmung die Person weiter beobachten und in eine sichere Position bringen, soweit erforderlich und möglich.','generic'],
+  ['8','Notfallzeichen','Bei länger anhaltendem oder wiederholtem Anfall ohne Erholung, Verletzungen, Atemproblemen oder anderen schweren Umständen professionelle Hilfe alarmieren.','generic']
+ ],
+ allergy:[
+  ['1','Warnzeichen erkennen','Achte auf Atemnot, Schwellung von Zunge oder Hals, Kreislaufprobleme, Bewusstseinsstörung oder rasche Verschlechterung.','generic'],
+  ['2','Notfall einschätzen','Bei schweren oder rasch zunehmenden Symptomen ist sofort professionelle Hilfe erforderlich.','generic'],
+  ['3','112 im echten Notfall','Im echten Notfall 112 alarmieren und die Leitstellenanweisungen befolgen. Diese Test-App wählt keine Nummer.','generic'],
+  ['4','Eigener Notfallplan','Falls die betroffene Person ein ärztlich verordnetes Notfallmedikament und einen persönlichen Notfallplan hat, diesem folgen.','generic'],
+  ['5','Beobachten','Bewusstsein und Atmung kontinuierlich beobachten und Veränderungen weitergeben.','generic']
+ ],
+ breath:[
+  ['1','Ruhe bewahren','Sprich ruhig mit der Person und vermeide unnötige körperliche Belastung.','generic'],
+  ['2','Position','Lass die Person eine Position einnehmen, in der sie möglichst gut atmen kann.','generic'],
+  ['3','Schweregrad prüfen','Achte auf starke Atemnot, bläuliche Verfärbung, Bewusstseinsstörung oder rasche Verschlechterung.','generic'],
+  ['4','Hilfe','Bei schweren Warnzeichen sofort professionelle Hilfe veranlassen und die Anweisungen der Leitstelle befolgen.','generic'],
+  ['5','Nicht allein lassen','Bleibe bei der Person und beobachte Bewusstsein und Atmung.','generic']
+ ],
+ chest:[
+  ['1','Belastung stoppen','Die Person soll körperliche Belastung beenden und sich möglichst ruhig verhalten.','generic'],
+  ['2','Warnzeichen prüfen','Achte insbesondere auf starke oder neue Brustschmerzen, Atemnot, kalten Schweiß, Übelkeit oder Ausstrahlung in Arm, Rücken, Hals oder Kiefer.','generic'],
+  ['3','Hilfe','Bei verdächtigen oder starken Beschwerden im echten Notfall 112 alarmieren und den Anweisungen der Leitstelle folgen.','generic'],
+  ['4','Nicht allein lassen','Bleibe bei der Person und beobachte Bewusstsein und Atmung.','generic'],
+  ['5','Verschlechterung','Bei Bewusstlosigkeit und fehlender normaler Atmung sofort den Reanimationsablauf beginnen.','generic']
+ ],
+ fall:[
+  ['1','Unfallstelle sichern','Achte zuerst auf Gefahren für dich und die betroffene Person.','generic'],
+  ['2','Nicht unnötig bewegen','Nach einem schweren Sturz die Person möglichst nicht unnötig bewegen.','generic'],
+  ['3','Bewusstsein prüfen','Sprich die Person an und prüfe, ob sie reagiert.','generic'],
+  ['4','Atmung prüfen','Bei Bewusstlosigkeit die Atmung prüfen. Bei fehlender oder unnormaler Atmung den Reanimationsablauf starten.','generic'],
+  ['5','Verletzungen beachten','Achte auf starke Blutungen, offensichtliche Fehlstellungen und andere schwere Verletzungen.','generic'],
+  ['6','Starke Blutung','Bei lebensbedrohlicher Blutung direkten Druck ausüben und professionelle Hilfe veranlassen.','generic'],
+  ['7','Überwachung','Bis Hilfe eintrifft Bewusstsein und Atmung beobachten und unnötige Bewegungen vermeiden.','generic']
+ ],
+ electric:[
+  ['1','Nicht anfassen','Berühre eine möglicherweise noch unter Strom stehende Person nicht.','generic'],
+  ['2','Strom sicher unterbrechen','Die Stromquelle muss sicher abgeschaltet oder getrennt werden, ohne dich selbst zu gefährden.','generic'],
+  ['3','Erst dann helfen','Erst wenn die elektrische Gefahr sicher beseitigt ist, zur Person gehen.','generic'],
+  ['4','Bewusstsein prüfen','Reaktion und Atmung prüfen.','generic'],
+  ['5','Reanimation','Bei fehlender oder unnormaler Atmung den Reanimationsablauf starten und professionelle Hilfe veranlassen.','generic'],
+  ['6','Verbrennungen beachten','Nach Stromunfällen können innere Verletzungen bestehen, auch wenn äußerlich wenig sichtbar ist. Medizinische Abklärung kann erforderlich sein.','generic']
+ ],
+ poison:[
+  ['1','Eigenschutz','Vermeide Kontakt mit dem Stoff und weitere Exposition.','generic'],
+  ['2','Stoff identifizieren','Wenn sicher möglich, Verpackung, Produktname oder andere Informationen zum Stoff bereithalten.','generic'],
+  ['3','Kein Erbrechen erzwingen','Kein Erbrechen auslösen und keine Hausmittel geben, sofern dies nicht ausdrücklich von Fachpersonal empfohlen wird.','generic'],
+  ['4','Hilfe organisieren','Bei schweren Symptomen sofort professionelle Hilfe veranlassen.','generic'],
+  ['5','Bewusstsein & Atmung','Bei Bewusstseinsstörung oder Atemproblemen den entsprechenden Notfallablauf starten.','generic'],
+  ['6','Informationen weitergeben','Menge, Zeitpunkt, Stoffname und beobachtete Symptome – soweit bekannt – an medizinisches Personal weitergeben.','generic']
+ ],
+ heat:[
+  ['1','Temperaturproblem erkennen','Achte auf starke Überhitzung oder Auskühlung und bringe die Person aus der gefährlichen Umgebung.','generic'],
+  ['2','Bei Überhitzung','Person an einen kühleren Ort bringen und angemessen kühlen.','generic'],
+  ['3','Bei Unterkühlung','Weitere Auskühlung verhindern und vorsichtig warm halten; keine riskante aggressive Erwärmung.','generic'],
+  ['4','Warnzeichen','Bewusstseinsstörung, Krämpfe, starke Verwirrtheit oder schwere Verschlechterung sind Notfallzeichen.','generic'],
+  ['5','Professionelle Hilfe','Bei schweren Symptomen professionelle Hilfe veranlassen und Bewusstsein und Atmung überwachen.','generic']
+ ]
+,
+ drowning:[
+  ['1','Eigenschutz','Bringe dich nicht selbst in Gefahr. Wenn möglich, eine sichere Rettungshilfe wie einen Rettungsring oder eine geeignete Auftriebshilfe nutzen.','generic'],
+  ['2','Aus dem Wasser','Bringe die Person nur so aus dem Wasser, dass du dich dabei nicht selbst gefährdest.','generic'],
+  ['3','Bewusstsein prüfen','Prüfe nach der Rettung sofort Reaktion und Atmung.','generic'],
+  ['4','Atmung prüfen','Bei fehlender oder unnormaler Atmung sofort den Reanimationsablauf starten und professionelle Hilfe veranlassen.','generic'],
+  ['5','Unterkühlung verhindern','Nasse Kleidung soweit sinnvoll entfernen und weitere Auskühlung verhindern, ohne notwendige lebensrettende Maßnahmen zu verzögern.','generic'],
+  ['6','Überwachung','Auch bei zunächst normaler Atmung die Person weiter beobachten und professionelle Hilfe nach der Situation veranlassen.','generic']
+ ],
+ stroke:[
+  ['1','FAST erkennen','Achte auf plötzlich hängenden Mundwinkel, Armschwäche oder Sprachstörung.','generic'],
+  ['2','Zeit merken','Merke dir, wann die Symptome erstmals aufgefallen sind bzw. wann die Person zuletzt sicher symptomfrei war.','generic'],
+  ['3','Sofort Hilfe','Bei Verdacht auf Schlaganfall im echten Notfall sofort 112 alarmieren.','generic'],
+  ['4','Nichts erzwingen','Die Person nicht zum Essen oder Trinken drängen und keine Medikamente auf eigene Faust geben.','generic'],
+  ['5','Beobachten','Bewusstsein und Atmung überwachen und Veränderungen an den Rettungsdienst weitergeben.','generic']
+ ],
+ hypoglycemia:[
+  ['1','Bewusstsein prüfen','Prüfe, ob die Person wach ist und sicher schlucken kann.','generic'],
+  ['2','Wach und schluckfähig','Wenn eine bekannte Unterzuckerung vorliegt und die Person sicher schlucken kann, nach ihrem persönlichen Notfallplan handeln.','generic'],
+  ['3','Nicht schluckfähig','Bei Bewusstseinsstörung oder fehlender sicherer Schluckfähigkeit nichts in den Mund geben.','generic'],
+  ['4','Hilfe','Bei schwerer Bewusstseinsstörung, Krampf oder fehlender Besserung professionelle Hilfe veranlassen.','generic'],
+  ['5','Atmung überwachen','Bewusstsein und Atmung weiter beobachten. Bei fehlender normaler Atmung den Reanimationsablauf starten.','generic']
+ ],
+ asthma:[
+  ['1','Belastung stoppen','Die Person soll die auslösende Belastung beenden und eine angenehme Atemposition einnehmen.','generic'],
+  ['2','Eigenes Notfallmedikament','Falls ein ärztlich verordnetes Inhalationsmedikament vorhanden ist, dem persönlichen Notfallplan folgen.','generic'],
+  ['3','Schweregrad beobachten','Achte auf zunehmende Atemnot, Sprechprobleme, Erschöpfung oder Bewusstseinsstörung.','generic'],
+  ['4','Hilfe','Bei schwerer oder zunehmender Atemnot sofort professionelle Hilfe veranlassen.','generic'],
+  ['5','Überwachen','Bei der Person bleiben und Bewusstsein und Atmung beobachten.','generic']
+ ],
+ eyechemical:[
+  ['1','Eigenschutz','Vermeide selbst Kontakt mit der Chemikalie und beachte die Hinweise des Produkts, sofern gefahrlos möglich.','generic'],
+  ['2','Auge spülen','Bei chemischer Exposition das betroffene Auge unverzüglich und ausgiebig mit sauberem Wasser spülen.','generic'],
+  ['3','Kontaktlinsen','Kontaktlinsen entfernen, wenn dies leicht möglich ist und das Spülen nicht verzögert.','generic'],
+  ['4','Weiter spülen','Das Spülen fortsetzen und professionelle medizinische Hilfe organisieren.','generic'],
+  ['5','Stoff mitgeben','Produktname oder Verpackung für medizinisches Personal bereithalten, ohne die eigene Sicherheit zu gefährden.','generic']
+ ],
+ amputation:[
+  ['1','Eigenschutz','Unfallstelle sichern und weitere Gefahren vermeiden.','generic'],
+  ['2','Lebensbedrohliche Blutung','Starke Blutung sofort mit direktem Druck kontrollieren; bei lebensbedrohlicher Blutung professionelle Hilfe veranlassen.','generic'],
+  ['3','Amputiertes Teil','Wenn gefahrlos möglich, das amputierte Körperteil suchen, ohne die Versorgung der Person zu verzögern.','generic'],
+  ['4','Schützen','Das Körperteil sauber und geschützt verpacken und nicht direkt auf Eis legen.','generic'],
+  ['5','Übergabe','Das Teil zusammen mit der betroffenen Person an den Rettungsdienst übergeben und Zeitpunkt sowie Unfallhergang mitteilen.','generic']
+ ],
+ concussion:[
+  ['1','Unfallmechanismus','Nach einem heftigen Sturz oder Schlag auf den Kopf die Person beobachten und unnötige Bewegung vermeiden.','generic'],
+  ['2','Bewusstsein prüfen','Achte auf Bewusstseinsstörung, zunehmende Verwirrtheit, wiederholtes Erbrechen oder andere deutliche Verschlechterungen.','generic'],
+  ['3','Warnzeichen','Bei Krampfanfall, Bewusstlosigkeit, zunehmender Verschlechterung oder anderen schweren Symptomen sofort professionelle Hilfe veranlassen.','generic'],
+  ['4','Überwachen','Bewusstsein und Atmung weiter beobachten und Veränderungen dokumentieren.','generic']
+ ],
+ shock:[
+  ['1','Ursache beseitigen','Sichere die Person vor der auslösenden Gefahr und behandle erkennbare lebensbedrohliche Ursachen, ohne dich selbst zu gefährden.','generic'],
+  ['2','Hilfe','Bei Zeichen eines Schocks wie blasser, kalter, schweißiger Haut, Schwäche oder Bewusstseinsstörung professionelle Hilfe veranlassen.','generic'],
+  ['3','Ruhig halten','Person möglichst ruhig halten und vor Auskühlung schützen.','generic'],
+  ['4','Überwachen','Bewusstsein und Atmung fortlaufend beobachten. Bei fehlender normaler Atmung den Reanimationsablauf starten.','generic']
+ ],
+ 
+};
+let current=null, idx=0, timer=null, elapsed=0, autoTimer=null, autoRemaining=0, autoEnabled=true;
+
+
+const triageSteps=[
+ {id:'danger',q:'Ist der Ort für dich sicher?',yes:'Weiter',no:'Nicht hineingehen / Hilfe organisieren',noAction:'danger'},
+ {id:'conscious',q:'Reagiert die betroffene Person auf Ansprache?',yes:'Ja',no:'Nein'},
+ {id:'breathing',q:'Atmet die Person normal?',yes:'Ja',no:'Nein / unnormal'},
+ {id:'bleeding',q:'Gibt es eine starke, nicht kontrollierbare Blutung?',yes:'Ja',no:'Nein'},
+ {id:'breath',q:'Besteht schwere Atemnot oder eine rasche Verschlechterung?',yes:'Ja',no:'Nein'},
+ {id:'chest',q:'Bestehen starke oder neue Brustschmerzen mit Warnzeichen?',yes:'Ja',no:'Nein'}
+];
+let triageIndex=0, triageState={};
+
+function startTriage(){
+ triageIndex=0; triageState={};
+ document.getElementById('home').classList.add('hidden');
+ document.getElementById('smartTriageCard').classList.add('hidden');
+ document.getElementById('flow').classList.remove('hidden');
+ renderTriage();
+}
+function renderTriage(){
+ stopAutoAdvance();
+ const q=triageSteps[triageIndex];
+ const f=document.getElementById('flow');
+ f.innerHTML=`<section class="card">
+   <button class="back" onclick="backFromTriage()">← Zur Übersicht</button>
+   <div class="stepno">Schnelleinschätzung · Frage ${triageIndex+1} von ${triageSteps.length}</div>
+   <div class="progress"><div style="width:${((triageIndex+1)/triageSteps.length)*100}%"></div></div>
+   <div class="triage-question">${q.q}</div>
+   <div class="triage-answer">
+    <button onclick="answerTriage(true)">${q.yes}</button>
+    <button class="urgent" onclick="answerTriage(false)">${q.no}</button>
+   </div>
+   <div class="notice" style="margin-top:14px"><b>Wichtig:</b> Bei einem echten medizinischen Notfall den Notruf 112 veranlassen. Diese Einschätzung ersetzt keine professionelle Beurteilung.</div>
+ </section>
+ <section class="card"><button class="secondary" onclick="speak('`+q.q+`')">🔊 Frage vorlesen</button></section>`;
+ speak(q.q);
+}
+function answerTriage(value){
+ const q=triageSteps[triageIndex];
+ triageState[q.id]=value;
+
+ if(q.id==='danger' && value===false){ showTriageResult('Eigenschutz zuerst','Betrete einen gefährlichen Bereich nicht. Veranlasse professionelle Hilfe aus sicherer Position.'); return; }
+ if(q.id==='conscious' && value===false){
+   triageIndex=2; renderTriage(); return;
+ }
+ if(q.id==='breathing' && value===false){
+   showTriageResult('Reanimationspfad','Keine normale Atmung ist ein zeitkritisches Warnzeichen. Im echten Notfall 112 veranlassen und den Reanimationsablauf starten.','cpr'); return;
+ }
+ if(q.id==='bleeding' && value===true){showTriageResult('Blutungspfad','Starke Blutung sofort kontrollieren und im echten Notfall professionelle Hilfe veranlassen.','bleeding');return;}
+ if(q.id==='breath' && value===true){showTriageResult('Atemnotpfad','Schwere oder zunehmende Atemnot braucht eine sofortige medizinische Einschätzung.','breath');return;}
+ if(q.id==='chest' && value===true){showTriageResult('Brustschmerzpfad','Neue oder starke Brustschmerzen mit Warnzeichen sind ein medizinischer Notfall.','chest');return;}
+
+ if(triageIndex<triageSteps.length-1){triageIndex++;renderTriage();}
+ else{showTriageResult('Keine eindeutige rote Flagge erkannt','Die Schnelleinschätzung hat keinen der abgefragten kritischen Pfade ausgelöst. Bei Unsicherheit oder Verschlechterung trotzdem medizinische Hilfe einholen.');}
+}
+function showTriageResult(title,text,route){
+ const f=document.getElementById('flow');
+ f.innerHTML=`<section class="card">
+  <button class="back" onclick="backFromTriage()">← Zur Übersicht</button>
+  <div class="stepno">Ergebnis der Schnelleinschätzung</div>
+  <h2>${title}</h2>
+  <p class="instruction">${text}</p>
+  ${route?`<button class="primary" onclick="start('${route}')">Passenden Ablauf öffnen</button>`:''}
+  <button class="secondary" onclick="startTriage()">Schnelleinschätzung neu starten</button>
+ </section>`;
+ speak(title+'. '+text);
+}
+function backFromTriage(){
+ stopAutoAdvance();
+ document.getElementById('flow').classList.add('hidden');
+ document.getElementById('home').classList.remove('hidden');
+ document.getElementById('smartTriageCard').classList.remove('hidden');
+}
+function start(key){logEvent('Ablauf gestartet: '+key);current=key;idx=0;document.getElementById('home').classList.add('hidden');document.getElementById('flow').classList.remove('hidden');render();}
+function back(){stopAutoAdvance();stopTimer();document.getElementById('flow').classList.add('hidden');document.getElementById('home').classList.remove('hidden');document.getElementById('smartTriageCard').classList.remove('hidden');}
+function render(){
+ stopAutoAdvance();
+ const f=document.getElementById('flow'), s=data[current][idx], total=data[current].length;
+ let extra='';
+ const isChoice=['safety','response','breathing','chokeChoice'].includes(s[3]);
+
+ if(s[3]==='compressions'){
+   extra=`<div class="pulse active">DRÜCKEN<br><small style="font-size:12px">100–120/min</small></div>
+   <div class="timer" id="timer">00:00</div>
+   <div class="route"><strong>🫀 CPR-Coach</strong><span id="compressionCount">Kompressionen: 0</span><br><span class="sub">Taktgeber aktiv. Die App misst nicht deine tatsächliche Drucktiefe.</span></div>
+   <div class="row"><button class="secondary" onclick="toggleTimer()" id="timerBtn">▶ Taktgeber starten</button><button class="secondary" onclick="resetTimer()">↺ Reset</button></div>
+   <button class="primary" style="margin-top:10px" onclick="next()">Nächster Schritt</button>`;
+ } else if(s[3]==='aed'){
+   extra=`<div class="notice safe"><b>AED:</b> Gerät einschalten, Elektroden entsprechend den Abbildungen anbringen und den gesprochenen Anweisungen des Geräts folgen. Während einer Analyse oder Schockabgabe niemanden berühren lassen.</div>
+   <button class="primary" style="margin-top:12px" onclick="next()">Nächster Schritt</button>`;
+ } else if(s[3]==='safety'){
+   extra=`<div class="choice"><button class="yes" onclick="next()">Ja, sicher</button><button class="no" onclick="sayDanger()">Nein / unsicher</button></div>`;
+ } else if(s[3]==='response'){
+   extra=`<div class="choice"><button class="yes" onclick="next()">Reagiert</button><button class="no" onclick="next()">Keine Reaktion</button></div>`;
+ } else if(s[3]==='breathing'){
+   extra=`<div class="choice"><button class="yes" onclick="breathYes()">Normale Atmung</button><button class="no" onclick="next()">Keine / unnormale</button></div>`;
+ } else if(s[3]==='chokeChoice'){
+   extra=`<div class="choice"><button class="yes" onclick="chokeYes()">Ja, Husten möglich</button><button class="no" onclick="next()">Nein / kaum Luft</button></div>`;
+ } else {
+   extra=`<button class="primary" onclick="next()">${idx===total-1?'Ablauf beenden':'Nächster Schritt'}</button>`;
+ }
+
+ const autoNote = !isChoice ? `<div class="notice safe" style="margin-top:10px"><b>Automatik aktiv:</b> Dieser Schritt wechselt nach <span id="autoCount">12</span> Sekunden automatisch weiter. Du kannst jederzeit selbst „Nächster Schritt“ drücken.</div>` : '';
+
+ f.innerHTML=`<section class="card step">
+ <button class="back" onclick="back()">← Zurück zur Übersicht</button>
+ <div class="stepno">Schritt ${idx+1} von ${total}</div>
+ <div class="progress"><div style="width:${((idx+1)/total)*100}%"></div></div>
+ <h2>${s[1]}</h2><p class="instruction">${s[2]}</p>${extra}${autoNote}
+ </section>
+ <section class="card"><button class="secondary" onclick="speakCurrent()">🔊 Diesen Schritt vorlesen</button></section>`;
+ speakCurrent();
+
+ // Branching decisions deliberately wait for the user's answer.
+ if(autoEnabled && !isChoice) startAutoAdvance();
+}
+function startAutoAdvance(){
+ autoRemaining=(current==='cpr'||current==='bleeding'||current==='breath'||current==='chest')?8:12;
+ const el=document.getElementById('autoCount');
+ if(el) el.textContent=autoRemaining;
+ autoTimer=setInterval(()=>{
+   autoRemaining--;
+   const c=document.getElementById('autoCount');
+   if(c)c.textContent=Math.max(autoRemaining,0);
+   if(autoRemaining<=0){clearInterval(autoTimer);autoTimer=null;next();}
+ },1000);
+}
+function stopAutoAdvance(){
+ if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+ autoRemaining=0;
+}
+
+function next(){stopAutoAdvance();logEvent('Schritt '+(idx+1)+' abgeschlossen: '+data[current][idx][1]);if(idx<data[current].length-1){idx++;render()}else{stopTimer();alert('Testablauf beendet. Es wurde kein Anruf ausgelöst.');back()}}
+function sayDanger(){speak('Stop. Betrete den Bereich nicht, wenn er für dich unsicher ist. Im echten Notfall professionelle Hilfe alarmieren.');}
+function breathYes(){idx=Math.min(idx+1,data[current].length-1);render();}
+function chokeYes(){idx=Math.min(idx+1,data[current].length-1);render();}
+function speakCurrent(){const s=data[current][idx];speak(s[1]+'. '+s[2])}
+
+let eventLog=[];
+try{eventLog=JSON.parse(localStorage.getItem('medhelpEventLog')||'[]')}catch(e){eventLog=[]}
+function logEvent(label){eventLog.push({time:new Date().toLocaleTimeString('de-DE'),label});localStorage.setItem('medhelpEventLog',JSON.stringify(eventLog.slice(-100)))}
+function openTool(type){
+ logEvent('Werkzeug geöffnet: '+type);
+ const f=document.getElementById('flow'); document.getElementById('home').classList.add('hidden'); f.classList.remove('hidden');
+ if(type==='location') renderLocationTool();
+ if(type==='log') renderLogTool();
+ if(type==='handover') renderHandoverTool();
+ if(type==='equipment') renderEquipmentTool();
+ if(type==='learn') renderLearnTool();
+}
+function toolShell(title,body){return `<section class="card"><button class="back" onclick="back()">← Zur Übersicht</button><div class="stepno">Notfall-Werkzeug</div><h2>${title}</h2>${body}</section>`}
+function renderLocationTool(){
+ const f=document.getElementById('flow');
+ f.innerHTML=toolShell('📍 Standort',`<p class="instruction">Der Browser kann deinen Standort nur nach deiner ausdrücklichen Freigabe abrufen. Die App zeigt ihn hier zur Weitergabe an; sie sendet ihn nicht automatisch an den Rettungsdienst.</p><button class="primary" onclick="getLocation()">Standort ermitteln</button><div id="locOut" class="route hidden"></div>`);
+}
+function getLocation(){
+ const out=document.getElementById('locOut'); out.classList.remove('hidden'); out.textContent='Standort wird angefragt…';
+ if(!navigator.geolocation){out.textContent='Dieser Browser unterstützt keine Standortabfrage.';return}
+ navigator.geolocation.getCurrentPosition(pos=>{
+   out.innerHTML=`<strong>Standortdaten</strong>Breitengrad: ${pos.coords.latitude.toFixed(6)}<br>Längengrad: ${pos.coords.longitude.toFixed(6)}<br>Genauigkeit: ca. ${Math.round(pos.coords.accuracy)} m`;
+   logEvent('Standort ermittelt');
+ },()=>out.textContent='Standort konnte nicht ermittelt werden. Prüfe die Browser-Berechtigung.');
+}
+function renderLogTool(){
+ const f=document.getElementById('flow');
+ const rows=eventLog.length?eventLog.map(x=>`<div class="route"><b>${x.time}</b><br>${x.label}</div>`).join(''):'<p class="sub">Noch keine Ereignisse.</p>';
+ f.innerHTML=toolShell('📝 Einsatzprotokoll',`${rows}<button class="secondary" onclick="downloadLog()">Protokoll speichern</button><button class="secondary" onclick="eventLog=[];localStorage.removeItem('medhelpEventLog');renderLogTool()">Protokoll löschen</button>`);
+}
+function downloadLog(){
+ const text=eventLog.map(x=>`${x.time} – ${x.label}`).join('\\n')||'Keine Ereignisse';
+ const blob=new Blob([text],{type:'text/plain;charset=utf-8'}), a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);a.download='MedHelp-Einsatzprotokoll.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+function renderHandoverTool(){
+ const f=document.getElementById('flow');
+ f.innerHTML=toolShell('🏥 Übergabe',`<p class="sub">Diese Felder werden lokal im Browser verarbeitet.</p>
+ <label>Was ist passiert?<input id="hoEvent" class="secondary" style="width:100%;margin:5px 0" placeholder="z. B. Sturz"></label>
+ <label>Wann begonnen?<input id="hoTime" type="time" class="secondary" style="width:100%;margin:5px 0"></label>
+ <label>Symptome / Beobachtungen<textarea id="hoSymptoms" class="secondary" style="width:100%;margin:5px 0;min-height:90px"></textarea></label>
+ <label>Was wurde gemacht?<textarea id="hoActions" class="secondary" style="width:100%;margin:5px 0;min-height:90px"></textarea></label>
+ <button class="primary" onclick="makeHandover()">Zusammenfassung erstellen</button><div id="hoOut"></div>`);
+}
+function makeHandover(){
+ const text=`EREIGNIS: ${document.getElementById('hoEvent').value||'—'}\\nBEGINN: ${document.getElementById('hoTime').value||'—'}\\nSYMPTOME: ${document.getElementById('hoSymptoms').value||'—'}\\nMASSNAHMEN: ${document.getElementById('hoActions').value||'—'}`;
+ document.getElementById('hoOut').innerHTML=`<div class="route"><strong>Übergabe</strong><pre style="white-space:pre-wrap">${text.replace(/</g,'&lt;')}</pre></div>`;
+}
+function renderEquipmentTool(){
+ const f=document.getElementById('flow');
+ const items=['AED','Handschuhe','Verbandmaterial','Rettungsdecke','Kühlmöglichkeit','Taschenlampe'];
+ f.innerHTML=toolShell('🧰 Ausrüstung',`<p class="instruction">Markiere, was tatsächlich vorhanden ist. Die Auswahl ist eine Merkhilfe und ändert nicht automatisch die medizinische Empfehlung.</p>${items.map(x=>`<label style="display:block;padding:12px;background:#182131;border-radius:12px;margin:7px 0"><input type="checkbox"> ${x}</label>`).join('')}<button class="primary" onclick="speak('Ausrüstungsliste gespeichert ist nicht erforderlich. Nutze die Auswahl als Merkhilfe.')">🔊 Vorlesen</button>`);
+}
+function renderLearnTool(){
+ const f=document.getElementById('flow');
+ f.innerHTML=toolShell('📚 Lernmodus',`<div class="route"><strong>Erkennen</strong> Warnzeichen und lebensbedrohliche Situationen früh erkennen.</div><div class="route"><strong>Entscheiden</strong> Sicherheit, Reaktion, Atmung und schwere Blutung zuerst berücksichtigen.</div><div class="route"><strong>Handeln</strong> Klare, kurze Maßnahmen durchführen und professionelle Hilfe einbeziehen.</div><div class="route"><strong>Überwachen</strong> Bewusstsein und Atmung weiter beobachten.</div><div class="notice" style="margin-top:12px">Lernmodus ist kein Ersatz für einen praktischen Erste-Hilfe-Kurs.</div>`);
+}
+function openEmergency(){document.getElementById('emergencyModal').classList.remove('hidden');}
+function closeEmergency(){document.getElementById('emergencyModal').classList.add('hidden');}
+function call112(){
+  // Deliberate second confirmation: the permanent red button itself never dials.
+  window.location.href='tel:112';
+}
+function speak(text){
+ const msg=String(text||'').trim();
+ if(!msg)return;
+
+ if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
+   alert('Die Sprachausgabe wird von diesem Browser nicht unterstützt. Die Anleitung kann weiterhin über die Bildschirmtasten bedient werden.');
+   return;
+ }
+
+ try{
+   speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(msg);
+   u.lang='de-DE';
+   const words=msg.split(/\s+/).length;
+   u.rate=words<=14?1.22:1.10;
+   u.pitch=1;
+
+   const voices=speechSynthesis.getVoices();
+   const v=voices.find(x=>/^de(-|_)?DE/i.test(x.lang))
+        ||voices.find(x=>/^de/i.test(x.lang));
+   if(v)u.voice=v;
+
+   speechSynthesis.speak(u);
+ }catch(e){
+   alert('Die Sprachausgabe konnte in dieser App-Umgebung nicht gestartet werden.');
+ }
+}
+let compressionCount=0;
+function toggleTimer(){
+ if(timer){clearInterval(timer);timer=null;document.getElementById('timerBtn').textContent='▶ Taktgeber starten';return}
+ timer=setInterval(()=>{
+   elapsed++;
+   document.getElementById('timer').textContent=fmt(elapsed);
+   // Displayed count is a metronome estimate, not a sensor measurement.
+   compressionCount=Math.round(elapsed*110/60);
+   const cc=document.getElementById('compressionCount');
+   if(cc)cc.textContent='Kompressionen (Taktgeber): '+compressionCount;
+ },1000);
+ document.getElementById('timerBtn').textContent='⏸ Taktgeber pausieren';
+}
+function resetTimer(){stopTimer();elapsed=0;compressionCount=0;const t=document.getElementById('timer');if(t)t.textContent='00:00';const cc=document.getElementById('compressionCount');if(cc)cc.textContent='Kompressionen: 0'}
+function stopTimer(){if(timer){clearInterval(timer);timer=null}elapsed=0;compressionCount=0}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+speechSynthesis?.addEventListener?.('voiceschanged',()=>{});
+</script>
+</body>
+</html>
